@@ -11,6 +11,11 @@ src/
     ├── ai_ml.yaml
     ├── econometrics.yaml
     └── physics.yaml
+install.sh             end-user installer (prebuilt binary, source fallback)
+scripts/release.sh     bump version, check, commit, tag, push
+.github/workflows/
+├── ci.yml             fmt, clippy, tests, shellcheck on every push/PR
+└── release.yml        on `v*` tag: build 4 targets, publish release
 ```
 
 ## Data flow

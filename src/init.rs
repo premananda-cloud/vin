@@ -128,7 +128,10 @@ mod tests {
         assert_eq!(fs::read_to_string(tmp.path().join("a.txt")).unwrap(), "old");
         assert_eq!(rep.files_skipped.len(), 1);
 
-        let forced = Options { force: true, ..OPTS };
+        let forced = Options {
+            force: true,
+            ..OPTS
+        };
         let mut rep = Report::default();
         materialize(tmp.path(), &tree.children, "p", forced, &mut rep).unwrap();
         assert_eq!(fs::read_to_string(tmp.path().join("a.txt")).unwrap(), "new");

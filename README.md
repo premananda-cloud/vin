@@ -17,8 +17,12 @@ $ vin init my_paper -t ai --git
 ## Install
 
 ```sh
-cargo install --path .
+curl -fsSL https://raw.githubusercontent.com/premananda-cloud/vin/main/install.sh | sh
 ```
+
+This downloads a prebuilt, checksum-verified binary into `~/.local/bin` and falls back to building from source if none exists for your platform. Run it again to upgrade. Other options (specific version, manual download, build from source, uninstall) are in [docs/installation.md](docs/installation.md).
+
+Building from a clone: `./install.sh --from-source` (or `cargo install --path .`).
 
 ## Quick start
 
@@ -41,10 +45,12 @@ Useful `init` flags: `-C <dir>` (parent directory), `-n` (dry run), `-f` (overwr
 
 See [`docs/`](docs/README.md):
 
+- [Installation](docs/installation.md): installer, manual download, build from source, uninstall
 - [Usage](docs/usage.md): every command and flag with examples
 - [Templates](docs/templates.md): built-in templates and the YAML format
 - [Configuration](docs/configuration.md): default template and custom templates
 - [Architecture](docs/architecture.md): code layout and how to extend
+- [Releasing](docs/releasing.md): publishing a new version (`scripts/release.sh`)
 
 ## License
 

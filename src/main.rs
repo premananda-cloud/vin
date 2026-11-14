@@ -237,7 +237,10 @@ fn cmd_list() -> Result<()> {
     println!("  vin show <name>            preview a template");
     println!("  vin init <project> -t <name>   create a workspace");
     println!("  vin default <name>         change the default");
-    println!("  custom templates live in {}", config::templates_dir()?.display());
+    println!(
+        "  custom templates live in {}",
+        config::templates_dir()?.display()
+    );
     Ok(())
 }
 
@@ -283,8 +286,7 @@ fn cmd_default(query: Option<String>, reset: bool) -> Result<()> {
 }
 
 fn cmd_add(file: &Path, name: Option<String>, force: bool) -> Result<()> {
-    let yaml =
-        fs::read_to_string(file).with_context(|| format!("reading {}", file.display()))?;
+    let yaml = fs::read_to_string(file).with_context(|| format!("reading {}", file.display()))?;
     let tree = tree::parse(&yaml).context("template is invalid")?;
 
     let name = match name {
@@ -354,8 +356,7 @@ fn cmd_init(
     // name (used for `<Paper Title>`) is the real folder name, never "." or "..".
     let joined = parent.join(&destination);
     let target = if joined.exists() {
-        fs::canonicalize(&joined)
-            .with_context(|| format!("cannot access {}", joined.display()))?
+        fs::canonicalize(&joined).with_context(|| format!("cannot access {}", joined.display()))?
     } else {
         joined
     };
@@ -373,19 +374,14 @@ fn cmd_init(
     let mut report = init::Report::default();
     init::materialize(&target, &tree.children, &project_name, opts, &mut report)?;
 
-    let nothing_new = report.dirs_created == 0
-        && report.files_created == 0
-        && report.files_overwritten == 0;
+    let nothing_new =
+        report.dirs_created == 0 && report.files_created == 0 && report.files_overwritten == 0;
     let verb = match (dry_run, nothing_new) {
         (true, _) => "Would create",
         (false, true) => "Nothing new to create for",
         (false, false) => "Created",
     };
-    println!(
-        "{verb} `{}` workspace at {}",
-        t.name,
-        target.display()
-    );
+    println!("{verb} `{}` workspace at {}", t.name, target.display());
     println!(
         "  {} directories, {} files{}",
         report.dirs_created,

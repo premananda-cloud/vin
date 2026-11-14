@@ -4,10 +4,12 @@
 
 | Page | Contents |
 |------|----------|
+| [installation.md](installation.md) | Installer script, manual download, build from source, uninstall |
 | [usage.md](usage.md) | Commands, flags, examples, exit behaviour |
 | [templates.md](templates.md) | Built-in templates in detail; writing your own YAML |
 | [configuration.md](configuration.md) | Config file, default template, custom template location |
 | [architecture.md](architecture.md) | Source layout, design decisions, how to add a built-in template |
+| [releasing.md](releasing.md) | Cutting a release, what CI builds, versioning |
 
 ## 30-second tour
 

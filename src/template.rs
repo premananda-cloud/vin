@@ -87,8 +87,8 @@ pub fn all() -> Result<Vec<Template>> {
             let Some(name) = path.file_stem().and_then(|s| s.to_str()).map(String::from) else {
                 continue;
             };
-            let yaml = fs::read_to_string(&path)
-                .with_context(|| format!("reading {}", path.display()))?;
+            let yaml =
+                fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
             let description = describe_custom(&yaml);
             let t = Template {
                 name: name.clone(),
