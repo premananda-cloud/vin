@@ -1,6 +1,6 @@
 [package]
 name = "vin"
-version = "0.1.0"
+version = "1.2.0"
 edition = "2021"
 description = "Initialise research paper workspaces from YAML directory templates"
 license = "MIT"
