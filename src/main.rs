@@ -8,13 +8,80 @@ mod tree;
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use config::Config;
+use std::ffi::OsString;
 use std::fs;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process::Command as Proc;
 
+const TOP_HELP: &str = "\
+Examples:
+  vin list                       see the available templates
+  vin init my_paper -t ai        new folder from the AI/ML template
+  vin init .                     set up the current directory
+
+More help:
+  vin help <command>             details and examples for a command
+  vin <command> --help           same thing";
+
+const INIT_HELP: &str = "\
+A destination is required: a folder name or path, or `.` for the current directory.
+Existing files are never overwritten unless --force is given.
+
+Examples:
+  vin init my_paper                    new folder from the default template
+  vin init my_paper -t phys            choose a template (name or unique prefix)
+  vin init .                           set up the current directory
+  vin init ~/papers/wage_gap -t econ   destination can be a path
+  vin init my_paper --git              also run `git init`
+  vin init my_paper -n                 dry run: show what would be created
+  vin init . --force                   refresh template files in place";
+
+const LIST_HELP: &str = "\
+The default template is marked with `*`. DIRS and FILES count what a template
+creates (excluding .gitkeep files). Custom templates live in the vin config
+directory (see `vin add`).
+
+Example:
+  vin list";
+
+const SHOW_HELP: &str = "\
+Prints the directory tree a template would create, without writing anything.
+With no template given, the default template is shown.
+
+Examples:
+  vin show                  default template, full tree
+  vin show physics          a specific template
+  vin show econ -d 1        top level only (name prefixes work)";
+
+const DEFAULT_HELP: &str = "\
+The default template is used by `vin init` when -t is not given. It is saved in
+the vin config file. The built-in default is `ai_ml`.
+
+Examples:
+  vin default               print the current default
+  vin default econ          make econometrics the default
+  vin default --reset       go back to ai_ml";
+
+const ADD_HELP: &str = "\
+The YAML is validated first. The template name defaults to the file name and may
+contain letters, digits, `_` and `-`. A custom template with the same name as a
+built-in one replaces it. Optional: put `# description: ...` at the top of the
+file to have it shown by `vin list`.
+
+Examples:
+  vin add mylab.yaml
+  vin add draft.yaml --name mylab
+  vin add mylab.yaml --force          replace an existing custom template";
+
 #[derive(Parser)]
-#[command(name = "vin", version, about, arg_required_else_help = true)]
+#[command(
+    name = "vin",
+    version,
+    about,
+    arg_required_else_help = true,
+    after_help = TOP_HELP
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -23,11 +90,16 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Create a new paper workspace from a template
-    #[command(visible_alias = "new")]
+    #[command(
+        visible_alias = "new",
+        override_usage = "vin init <DESTINATION> [OPTIONS]",
+        after_help = INIT_HELP
+    )]
     Init {
-        /// Workspace name; use `.` for the current directory.
-        /// Defaults to the template's root folder name.
-        name: Option<String>,
+        /// Where to create the workspace: a folder name or path, or `.` for the
+        /// current directory (required)
+        #[arg(value_name = "DESTINATION")]
+        destination: Option<String>,
         /// Template to use (name or unique prefix); defaults to your default template
         #[arg(short, long)]
         template: Option<String>,
@@ -48,9 +120,10 @@ enum Command {
         dry_run: bool,
     },
     /// List available templates
-    #[command(visible_alias = "ls")]
+    #[command(visible_alias = "ls", after_help = LIST_HELP)]
     List,
     /// Preview a template's directory tree
+    #[command(after_help = SHOW_HELP)]
     Show {
         /// Template to show; defaults to your default template
         template: Option<String>,
@@ -59,6 +132,7 @@ enum Command {
         depth: Option<usize>,
     },
     /// Show or change the default template
+    #[command(after_help = DEFAULT_HELP)]
     Default {
         /// Template to make the default; omit to show the current one
         template: Option<String>,
@@ -67,6 +141,7 @@ enum Command {
         reset: bool,
     },
     /// Install a custom template from a YAML file
+    #[command(after_help = ADD_HELP)]
     Add {
         /// Path to the template YAML file
         file: PathBuf,
@@ -86,17 +161,26 @@ fn main() {
     }
 }
 
+/// Make `vin --help init` (and `-h init`) behave like `vin help init`.
+fn normalize_args(mut args: Vec<OsString>) -> Vec<OsString> {
+    if args.len() > 2 && matches!(args[1].to_str(), Some("--help" | "-h")) {
+        args[1] = OsString::from("help");
+    }
+    args
+}
+
 fn run() -> Result<()> {
-    match Cli::parse().command {
+    let cli = Cli::parse_from(normalize_args(std::env::args_os().collect()));
+    match cli.command {
         Command::Init {
-            name,
+            destination,
             template,
             path,
             force,
             no_gitkeep,
             git,
             dry_run,
-        } => cmd_init(name, template, path, force, no_gitkeep, git, dry_run),
+        } => cmd_init(destination, template, path, force, no_gitkeep, git, dry_run),
         Command::List => cmd_list(),
         Command::Show { template, depth } => cmd_show(template, depth),
         Command::Default { template, reset } => cmd_default(template, reset),
@@ -241,7 +325,7 @@ fn cmd_add(file: &Path, name: Option<String>, force: bool) -> Result<()> {
 
 #[allow(clippy::too_many_arguments)]
 fn cmd_init(
-    name: Option<String>,
+    destination: Option<String>,
     query: Option<String>,
     path: Option<PathBuf>,
     force: bool,
@@ -249,6 +333,14 @@ fn cmd_init(
     git: bool,
     dry_run: bool,
 ) -> Result<()> {
+    let Some(destination) = destination.filter(|d| !d.trim().is_empty()) else {
+        bail!(
+            "please provide a destination: a folder name (`vin init my_paper`) \
+             or `.` for the current directory (`vin init .`)\n\
+             run `vin help init` for details"
+        );
+    };
+
     let cfg = Config::load()?;
     let templates = template::all()?;
     let t = template::resolve(query.as_deref().unwrap_or(cfg.default_name()), &templates)?;
@@ -258,23 +350,20 @@ fn cmd_init(
         Some(p) => p,
         None => std::env::current_dir()?,
     };
-    let (target, project_name) = match name.as_deref() {
-        Some(".") => {
-            let abs = fs::canonicalize(&parent)
-                .with_context(|| format!("cannot access {}", parent.display()))?;
-            let n = abs
-                .file_name()
-                .and_then(|s| s.to_str())
-                .unwrap_or("paper")
-                .to_string();
-            (abs, n)
-        }
-        Some(n) => {
-            tree::validate_name(n)?;
-            (parent.join(n), n.to_string())
-        }
-        None => (parent.join(&tree.root_name), tree.root_name.clone()),
+    // `.` and existing folders are resolved to an absolute path so the project
+    // name (used for `<Paper Title>`) is the real folder name, never "." or "..".
+    let joined = parent.join(&destination);
+    let target = if joined.exists() {
+        fs::canonicalize(&joined)
+            .with_context(|| format!("cannot access {}", joined.display()))?
+    } else {
+        joined
     };
+    let project_name = target
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("paper")
+        .to_string();
 
     let opts = init::Options {
         force,
@@ -325,4 +414,37 @@ fn cmd_init(
         println!("\nNext: cd {}", target.display());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args(a: &[&str]) -> Vec<OsString> {
+        a.iter().map(OsString::from).collect()
+    }
+
+    #[test]
+    fn help_flag_before_subcommand_becomes_help_command() {
+        assert_eq!(
+            normalize_args(args(&["vin", "--help", "init"])),
+            args(&["vin", "help", "init"])
+        );
+        assert_eq!(
+            normalize_args(args(&["vin", "-h", "show"])),
+            args(&["vin", "help", "show"])
+        );
+    }
+
+    #[test]
+    fn other_invocations_are_untouched() {
+        for a in [
+            &["vin", "--help"][..],
+            &["vin", "init", "--help"],
+            &["vin", "help", "init"],
+            &["vin", "init", "."],
+        ] {
+            assert_eq!(normalize_args(args(a)), args(a));
+        }
+    }
 }

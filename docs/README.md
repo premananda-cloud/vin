@@ -17,4 +17,6 @@ vin show physics -d 2         # preview a template two levels deep
 vin default econometrics      # make it your default
 vin init my_paper             # uses the default template
 vin init other -t ai --git    # pick a template, run git init
+vin init .                    # set up the current directory
+vin help init                 # detailed help for any command
 ```

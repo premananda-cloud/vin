@@ -26,13 +26,16 @@ cargo install --path .
 |---------|--------------|
 | `vin list` | List templates; the default is marked with `*` |
 | `vin show <template> [-d N]` | Preview a template's tree |
-| `vin init [name] [-t template]` | Create a workspace (alias: `new`) |
+| `vin init <destination> [-t template]` | Create a workspace; `.` = current directory (alias: `new`) |
+| `vin help <command>` | Detailed help and examples (also `vin --help <command>`) |
 | `vin default [template]` | Show or set the default template (`--reset` to clear) |
 | `vin add <file.yaml>` | Install your own template |
 
 Template names can be shortened to a unique prefix: `ai`, `econ`, `phys`.
 
-Useful `init` flags: `-C <dir>` (parent directory), `.` as name (use current directory), `-n` (dry run), `-f` (overwrite), `--git` (run `git init`), `--no-gitkeep`.
+`vin init` needs a destination: a folder name/path, or `.` for the current directory.
+
+Useful `init` flags: `-C <dir>` (parent directory), `-n` (dry run), `-f` (overwrite), `--git` (run `git init`), `--no-gitkeep`.
 
 ## Documentation
 

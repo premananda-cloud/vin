@@ -13,6 +13,20 @@ Commands:
 
 Running `vin` with no command prints help.
 
+## Getting help
+
+Every command has detailed help with examples:
+
+```sh
+vin help init        # or: vin --help init, vin init --help
+vin help show
+vin help default
+vin help add
+vin help list
+```
+
+`vin --help` shows the overview, and `vin help <command>` shows the options and examples for one command.
+
 ## Choosing a template
 
 Everywhere a template is accepted you can use its full name or any **unique prefix**:
@@ -42,13 +56,13 @@ paper_template_for_econometrics/
 ...
 ```
 
-## `vin init [NAME] [OPTIONS]`
+## `vin init <DESTINATION> [OPTIONS]`
 
-Creates the workspace.
+Creates the workspace. A **destination is required**; without one, vin stops with `please provide a destination`.
 
 | Argument / flag | Meaning |
 |-----------------|---------|
-| `NAME` | Folder to create. `.` means the current directory. If omitted, the template's own root name is used (e.g. `paper_template_for_ai`). |
+| `DESTINATION` | Required. A folder name or path to create (`my_paper`, `~/papers/wage_gap`), or `.` to set up the **current directory**. |
 | `-t, --template <T>` | Template name or prefix. Defaults to the default template. |
 | `-C, --path <DIR>` | Create the workspace inside `DIR` instead of the current directory. |
 | `-n, --dry-run` | Print the summary, write nothing. |
@@ -60,8 +74,8 @@ Behaviour:
 
 - **Existing directories are merged into.** Existing files are **skipped** and reported, never overwritten, unless `--force` is given. Re-running `init` is therefore safe.
 - **Empty directories get a `.gitkeep`** so git tracks the structure. The generated `.gitignore` allows it (`!**/.gitkeep`).
-- **`<Paper Title>`** inside template files is replaced with the workspace name (for `.`, the current folder's name).
-- Names containing `/`, `\` or `..` are rejected.
+- **`<Paper Title>`** inside template files is replaced with the name of the destination folder (for `.`, the current folder's name).
+- Missing parent folders in a path are created (`vin init a/b/c` works).
 
 ### Examples
 
@@ -71,6 +85,7 @@ vin init . -t physics                      # populate the current (empty) folder
 vin init wage_gap -t econ -C ~/papers      # ~/papers/wage_gap
 vin init demo -t ai -n                     # dry run
 vin init demo -t ai --force                # refresh template files in place
+vin init                                   # error: please provide a destination
 ```
 
 ## `vin default [TEMPLATE] [--reset]`
