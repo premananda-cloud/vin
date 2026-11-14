@@ -1,0 +1,12 @@
+data/raw/*
+data/interim/*
+*.dta
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+__pycache__/
+.Rhistory
+.DS_Store
+!**/.gitkeep
