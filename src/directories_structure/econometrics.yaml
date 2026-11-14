@@ -1,0 +1,121 @@
+# src/directories_structure/econometrics.yaml
+# Convention: mapping -> directory | null -> empty directory | string -> file with that content
+paper_template_for_econometrics:
+  README.md: |
+    # <Paper Title>
+
+    Workspace for an econometrics / empirical economics paper.
+
+    ## Layout
+    - data: raw (immutable), interim, processed, external, codebooks
+    - sources: estimation code (Stata/R/Python), cleaning, robustness
+    - results: regression tables, figures, diagnostics, robustness checks
+    - visualization: charts and diagrams
+    - literature: references (bib), pdfs, notes, prose drafts
+    - chronology: timeline of events, policy dates, data vintages, work log
+    - latex: manuscript sources
+    - replication: package for journal replication requirements
+    - reports, dport, submission, template
+  .gitignore: |
+    data/raw/*
+    data/interim/*
+    *.dta
+    *.aux
+    *.log
+    *.out
+    *.bbl
+    *.blg
+    __pycache__/
+    .Rhistory
+    .DS_Store
+    !**/.gitkeep
+  Makefile: |
+    .PHONY: paper clean
+    paper:
+    	cd latex && latexmk -pdf main.tex
+    	cp latex/main.pdf submission/main.pdf
+    clean:
+    	cd latex && latexmk -C
+  chronology:
+    timeline.md: |
+      # Timeline
+      | Date | Event / policy / data release | Relevance |
+      |------|------------------------------|-----------|
+    worklog.md: ""
+  data:
+    raw:
+    interim:
+    processed:
+    external:
+    codebook:
+    DATA_CARD.md: |
+      # Data Card
+      - Source / vintage / access date:
+      - Unit of observation and panel structure:
+      - Sample restrictions:
+      - Variable definitions: see codebook/
+      - Missing data handling:
+  sources:
+    cleaning:
+    estimation:
+    robustness:
+    utils:
+    tests:
+    run_all.md: |
+      # Run order
+      1. cleaning
+      2. estimation
+      3. robustness
+      4. figures and tables
+  results:
+    tables:
+    figures:
+    diagnostics:
+    robustness:
+    descriptive:
+  visualization:
+    charts:
+    diagram:
+    maps:
+  literature:
+    prose:
+    references:
+      references.bib: ""
+    pdfs:
+    notes:
+  latex:
+    sections:
+    tables:
+    figures:
+    appendix:
+    bibliography:
+    main.tex: |
+      \documentclass{article}
+      \begin{document}
+      \title{Title}
+      \author{Author}
+      \maketitle
+      \begin{abstract}
+      \end{abstract}
+      \end{document}
+  replication:
+    README.md: |
+      # Replication package
+      Software versions, run order, data access instructions, runtime estimate.
+    code:
+    data_instructions:
+  reports:
+    progress:
+    referee:
+    final:
+  dport:
+  submission:
+    draft:
+    final:
+    cover_letter:
+    response_to_referees:
+  template:
+  docs:
+    identification_strategy.md: ""
+    decisions.md: ""
+    meetings:

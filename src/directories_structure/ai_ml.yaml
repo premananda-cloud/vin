@@ -1,0 +1,180 @@
+# src/directories_structure/ai_ml.yaml
+# Convention: mapping -> directory | null -> empty directory | string -> file with that content
+paper_template_for_ai:
+  README.md: |
+    # <Paper Title>
+
+    Workspace for an AI/ML research paper. Customise freely.
+
+    ## Layout
+    | Directory      | Purpose |
+    |----------------|---------|
+    | data           | Datasets: raw (immutable), interim, processed, external |
+    | configs        | Experiment, model and training configs (YAML/TOML) |
+    | sources        | Project code, preserved structure from the working repo |
+    | notebooks      | Exploration and analysis notebooks |
+    | experiments    | One folder per run/sweep: config snapshot, logs, seeds |
+    | results        | Metrics, tables, figures, checkpoints, ablations |
+    | diagram        | Plots and diagrams (source + exported) |
+    | latex          | LaTeX sources with curated assets, compiles standalone |
+    | literature     | Papers (pdf), notes, references (bib), prose drafts |
+    | reproduction   | Re-running experiments from other repositories |
+    | reports        | Comprehensive reports, reviews, progress updates |
+    | dport          | Documents for teammates/collaborators (copies allowed) |
+    | presentation   | Slides, posters, talk assets |
+    | submission     | Compiled PDFs, camera-ready, supplementary, rebuttal |
+    | template       | Journal/conference templates |
+    | docs           | Project notes, decisions log, meeting notes |
+    | scripts        | Helper scripts (download data, build paper, export figures) |
+
+    ## Rules of thumb
+    - `data/raw` is never edited by hand.
+    - Every figure in `latex/figures` is generated from `sources` or `diagram`.
+    - Every reported number traces to a file in `results`.
+    - Record seeds, environment and commit hash for every experiment.
+  .gitignore: |
+    # data and artifacts
+    data/raw/*
+    data/interim/*
+    data/processed/*
+    results/checkpoints/*
+    experiments/*/checkpoints/
+    *.ckpt
+    *.pt
+    *.pth
+    *.safetensors
+    # python
+    __pycache__/
+    *.pyc
+    .venv/
+    .ipynb_checkpoints/
+    # latex
+    *.aux
+    *.log
+    *.out
+    *.synctex.gz
+    *.bbl
+    *.blg
+    # os / editor
+    .DS_Store
+    .vscode/
+    # keep placeholders
+    !**/.gitkeep
+  Makefile: |
+    .PHONY: paper figures clean
+    paper:
+    	cd latex && latexmk -pdf main.tex
+    	cp latex/main.pdf submission/main.pdf
+    figures:
+    	python scripts/export_figures.py
+    clean:
+    	cd latex && latexmk -C
+  requirements.txt: ""
+  environment.yml: |
+    name: paper_env
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.11
+      - pip
+  data:
+    raw:
+    interim:
+    processed:
+    external:
+    splits:
+    DATA_CARD.md: |
+      # Data Card
+      - Source / license:
+      - Collection date:
+      - Size / format:
+      - Preprocessing steps:
+      - Known issues / biases:
+  configs:
+    model:
+    training:
+    experiment:
+    sweeps:
+  sources:
+    src:
+    tests:
+    README.md: ""
+  notebooks:
+    exploration:
+    analysis:
+  experiments:
+    EXPERIMENT_LOG.md: |
+      # Experiment Log
+      | ID | Date | Commit | Config | Seed | Goal | Result | Notes |
+      |----|------|--------|--------|------|------|--------|-------|
+  results:
+    metrics:
+    tables:
+    figures:
+    checkpoints:
+    ablations:
+    logs:
+    analysis:
+  diagram:
+    src:
+    export:
+  latex:
+    sections:
+    figures:
+    tables:
+    bibliography:
+    appendix:
+    supplementary:
+    main.tex: |
+      \documentclass{article}
+      \begin{document}
+      \title{Title}
+      \author{Author}
+      \maketitle
+      \begin{abstract}
+      \end{abstract}
+      % \input{sections/introduction}
+      % \bibliography{bibliography/references}
+      \end{document}
+  literature:
+    prose:
+    references:
+      references.bib: ""
+    pdfs:
+    notes:
+    reading_list.md: |
+      # Reading List
+      | Paper | Venue/Year | Status | Key takeaway |
+      |-------|-----------|--------|--------------|
+  reproduction:
+    repos:
+    logs:
+    REPRODUCTION_NOTES.md: ""
+  reports:
+    progress:
+    reviews:
+    final:
+  dport:
+  presentation:
+    slides:
+    poster:
+    assets:
+  submission:
+    draft:
+    camera_ready:
+    supplementary:
+    rebuttal:
+    checklist.md: |
+      # Submission Checklist
+      - [ ] Page limit / anonymisation
+      - [ ] Code and data availability statement
+      - [ ] Ethics / broader impact statement
+      - [ ] Reproducibility checklist
+      - [ ] Bibliography compiled, no missing refs
+      - [ ] Figures legible in grayscale
+  template:
+  docs:
+    decisions.md: ""
+    meetings:
+    ideas.md: ""
+  scripts:

@@ -1,0 +1,115 @@
+# src/directories_structure/physics.yaml
+# Convention: mapping -> directory | null -> empty directory | string -> file with that content
+paper_template_for_physics:
+  README.md: |
+    # <Paper Title>
+
+    Workspace for a physics paper (theory, simulation, or experiment).
+
+    ## Layout
+    - model: theoretical model, Hamiltonian/Lagrangian, assumptions, parameters
+    - derivations: analytic work, calculations, checks
+    - simulation: code, input decks, run outputs
+    - data: raw/processed measurements or simulation output
+    - analysis: fitting, error analysis, statistics
+    - diagram: figures, plots, schematics
+    - latex: manuscript sources
+    - literature: references (bib), pdfs, notes, prose drafts
+    - send: material prepared for collaborators/referees
+    - submission, template, reports, docs
+  .gitignore: |
+    data/raw/*
+    simulation/runs/*
+    *.h5
+    *.npy
+    *.aux
+    *.log
+    *.out
+    *.bbl
+    *.blg
+    __pycache__/
+    .ipynb_checkpoints/
+    .DS_Store
+    !**/.gitkeep
+  Makefile: |
+    .PHONY: paper clean
+    paper:
+    	cd latex && latexmk -pdf main.tex
+    	cp latex/main.pdf submission/main.pdf
+    clean:
+    	cd latex && latexmk -C
+  model:
+    assumptions.md: ""
+    parameters.md: |
+      # Parameters and units
+      | Symbol | Meaning | Value | Units | Source |
+      |--------|---------|-------|-------|--------|
+    notation.md: ""
+  derivations:
+    analytic:
+    checks:
+    notebooks:
+  simulation:
+    src:
+    inputs:
+    runs:
+    convergence:
+    SIM_LOG.md: |
+      # Simulation Log
+      | Run | Date | Commit | Parameters | Seed | Notes |
+      |-----|------|--------|-----------|------|-------|
+  data:
+    raw:
+    processed:
+    external:
+    metadata:
+  analysis:
+    fitting:
+    error_analysis:
+    scripts:
+    results:
+  sources:
+    src:
+    tests:
+  diagram:
+    src:
+    export:
+    schematics:
+  latex:
+    sections:
+    figures:
+    tables:
+    appendix:
+    bibliography:
+    main.tex: |
+      \documentclass{article}
+      \usepackage{amsmath,amssymb,physics,siunitx}
+      \begin{document}
+      \title{Title}
+      \author{Author}
+      \maketitle
+      \begin{abstract}
+      \end{abstract}
+      \end{document}
+  literature:
+    prose:
+    references:
+      references.bib: ""
+    pdfs:
+    notes:
+  send:
+    collaborators:
+    referees:
+  reports:
+    progress:
+    final:
+  submission:
+    draft:
+    final:
+    cover_letter:
+    response_to_referees:
+  template:
+  docs:
+    decisions.md: ""
+    meetings:
+    ideas.md: ""
